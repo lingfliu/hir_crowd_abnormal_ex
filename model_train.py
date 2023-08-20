@@ -53,7 +53,7 @@ for ep in range(epoch_size):
         o = net(batch_x)
         pred = torch.argmax(o, 1)
         truth = torch.argmax(batch_y, 1)
-        acc = pred.eq(truth).sum().item() / truth.shape[0]
+        acc = pred.eq(truth).sum().item() / (truth.shape[0] + 0.001)
         loss = net.loss(o, batch_y)
         train_loss = loss.item()
 
@@ -64,7 +64,37 @@ for ep in range(epoch_size):
 
         print('ep {} batch {}, loss = {}, acc = {}'.format(ep, b, loss.item(), acc))
 
-    # net.eval()
+
+    net.eval()
+
+    val_batches = len(test_idx) //batch_size
+    acc_vals = []
+    loss_vals = []
+    for b in range(val_batches):
+        batch_x= flows[test_idx[b*batch_size:b*batch_size+batch_size]].astype(np.float32)
+        batch_x = batch_x.transpose(0, 3, 1, 2)
+        batch_x = torch.from_numpy(batch_x).float()
+        batch_x = batch_x.to(net.device)
+
+        batch_y = y[test_idx[b*batch_size:b*batch_size+batch_size]]
+
+        o = net(batch_x)
+        pred = torch.argmax(o, 1)
+        truth = torch.argmax(batch_y, 1)
+        acc = pred.eq(truth).sum().item() / (truth.shape[0] + 0.001)
+        loss = net.loss(o, batch_y)
+        loss_val = loss.item()
+
+        acc_vals.append(acc)
+        loss_vals.append(loss_val)
+
+    acc_avg_val = np.average(np.array(acc_vals))
+    loss_avg_val = np.average(np.array(loss_vals))
+    print('ep {} val loss = {}, acc = {}'.format(ep, loss_avg_val, acc_avg_val))
+
+
+
+
 
 
 
