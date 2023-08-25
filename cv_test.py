@@ -26,7 +26,7 @@ video_file = '011.mp4'
 
 cap = cv2.VideoCapture(video_file)
 ret, frame1 = cap.read()
-frame1 = cv2.resize(frame1, (0, 0), fx=0.25, fy=0.25)
+# frame1 = cv2.resize(frame1, (0, 0), fx=0.25, fy=0.25)
 prvs = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
 hsv = np.zeros_like(frame1)
 hsv[...,1] = 255
@@ -35,7 +35,7 @@ while True:
     ret, frame2 = cap.read()
     if not ret:
         break
-    frame2 = cv2.resize(frame2, (0, 0), fx=0.25, fy=0.25)
+    # frame2 = cv2.resize(frame2, (0, 0), fx=0.25, fy=0.25)
     next = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
     flow = cv2.calcOpticalFlowFarneback(prvs, next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
