@@ -17,6 +17,24 @@ def label_load(label_mat='label_collapsed.mat'):
     return mat['label_collapsed']
 
 
+def label_load_trunc(label_mat='label_collapsed.mat'):
+    mat = sio.loadmat(label_mat)
+    labels = mat['label_collapsed']
+
+    labels_trunc = np.empty((0, 3))
+    file_idx = -1
+    frame_idx = -1
+    for l in labels:
+        if file_idx == l[0]:
+            if frame_idx > 0:
+                labels_trunc = np.append(labels_trunc, np.array([l]), axis=0)
+            frame_idx += 1
+        else:
+            frame_idx  = 0
+            file_idx = l[0]
+    return labels_trunc
+
+
 def flow_calc(video_file, flow_path):
     # Get the video name
     video_name = os.path.splitext(os.path.basename(video_file))[0]
@@ -99,10 +117,10 @@ def flow_precalc_seq(video_root, flow_root):
             img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             flow = np.zeros((img.shape[0], img.shape[1], 2))
 
-            flows = np.zeros((int(frames), img.shape[0], img.shape[1], 2))
+            flows = np.empty((0, img.shape[0], img.shape[1], 2))
 
             prev_img = img
-            prev_img_grey = img_grey
+            prev_img_grey = img_grey # buffer previous frame
             prev_flow = flow
 
             frame_idx = 0
@@ -115,13 +133,14 @@ def flow_precalc_seq(video_root, flow_root):
                 img = cv2.resize(img, (0, 0), fx=video_resize, fy=video_resize)
                 img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-                # # visualize video
+                # visualize video
                 # cv2.imshow('frame', img_grey)
                 # if cv2.waitKey(2) & 0xFF == ord('q'):
                 #     break
 
                 flow = cv2.calcOpticalFlowFarneback(prev_img_grey, img_grey, None, 0.5, 5, 15, 3, 5, 1.1, cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
-                flows[frame_idx, :, :, :] = flow  #np.append(flows, np.array([flow]), axis=0)
+                # flows[frame_idx, :, :, :] = np.append(flows, np.array([flow]), axis=0)
+                flows = np.append(flows, np.array([flow]), axis=0)
 
                 prev_img = img
                 prev_img_grey = img_grey
