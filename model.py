@@ -45,7 +45,7 @@ class Unet(nn.Module):
 
         self.convF1 = nn.Linear(in_features=feature_size*120*214, out_features=64)
         self.convF2 = nn.Linear(in_features=64, out_features=64)
-        self.convF3 = nn.Linear(in_features=64, out_features=5)
+        self.convF3 = nn.Linear(in_features=64, out_features=6)
 
         self.optim = torch.optim.Adam(self.parameters(), lr=0.001)
         self.criteria = nn.CrossEntropyLoss()
