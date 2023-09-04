@@ -2,24 +2,25 @@ import torch
 import numpy as np
 
 from array_tool import to_categorical
-from model import Unet
-from dataloader import label_load, flow_load
+from model import Unet, Fcn
+from dataloader import label_load_trunc, flow_load
 import random
 
 
-label_collapsed = label_load()
+net = Fcn()
+net = net.to(net.device)
+
+label_collapsed = label_load_trunc() # 减掉第一帧的标签
 labels = []
 for label in label_collapsed:
     labels.append(label[2])
 flow_root = '../../data/Motion_Emotion_Dataset/flows'
 flows, flow_index = flow_load(flow_root)
 
-net = Unet()
-net = net.to(net.device)
-y = torch.from_numpy(to_categorical([l-1 for l in labels], 5)).to(net.device)
+y = torch.from_numpy(to_categorical([l for l in labels], 6)).to(net.device)
 
 epoch_size = 500
-batch_size = 400
+batch_size = 300
 
 # manually split train & test videos
 # take the first 25 videos as the training dataset, the last 6 videos as the test dataset
@@ -35,12 +36,13 @@ test_idx = [i+idx for i in range(label_collapsed.shape[0]-idx)]
 
 
 batches = len(train_idx)//batch_size
+
+ep_idx = [i for i in range(len(train_idx))]
+random.shuffle(ep_idx)
+
 for ep in range(epoch_size):
 
     net.train()
-
-    ep_idx = [i for i in range(len(train_idx))]
-    random.shuffle(ep_idx)
 
     for b in range(batches):
         batch_x= flows[ep_idx[b*batch_size:b*batch_size+batch_size]].astype(np.float32)
