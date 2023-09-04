@@ -164,20 +164,22 @@ def flow_load(flow_root):
     for file in flow_files:
         flow = np.load(file)
         frames_all += flow.shape[0]
-        flow_all = np.empty((0, flow.shape[1], flow.shape[2], flow.shape[3]))
-        info = 'calculating frames of flow file {0} = {1}'.format(file, flow.shape[0])
-        print("\r" + info, end="")
-    print('\n')
+        break
+    #     flow_all = np.empty((0, flow.shape[1], flow.shape[2], flow.shape[3]))
+    #     info = 'calculating frames of flow file {0} = {1}'.format(file, flow.shape[0])
+    #     print("\r" + info, end="")
+    # print('\n')
 
-    flow_all = np.zeros((frames_all, flow.shape[1], flow.shape[2], flow.shape[3]))
+    flow_all = np.empty((0, flow.shape[1], flow.shape[2], flow.shape[3]))
+    # flow_all = np.zeros((frames_all, flow.shape[1], flow.shape[2], flow.shape[3]))
 
     flow_index = []
     fidx = 0
     for file in flow_files:
         flows = np.load(file)
         # add all flows
-        # flow_all = np.append(flow_all, flows, axis=0)
-        flow_all[fidx:fidx + flows.shape[0], :, :, :] = flows
+        flow_all = np.append(flow_all, flows, axis=0)
+        # flow_all[fidx:fidx + flows.shape[0], :, :, :] = flows
         # mark flow frames
         # repeatly add the index of the video file
         idx_list = [fidx, ] * flows.shape[0]

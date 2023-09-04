@@ -13,6 +13,7 @@ class Conv(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_size),
+            nn.Dropout2d(0.4),
             nn.ReLU(inplace=True)
         )
 
@@ -91,6 +92,73 @@ class Unet(nn.Module):
         xU0 = self.convF2(xU0)
         xU0 = nn.ReLU(inplace=True)(xU0)
         xU0 = self.convF3(xU0)
+        xU0 = nn.ReLU(inplace=True)(xU0)
+
+        o = F.log_softmax(xU0, dim=1)
+        return o
+
+    def loss(self, input, target):
+        return self.criteria(input, target.argmax(1))
+
+    def summarize(self):
+
+        output = str(self)
+        output += '\n'
+        output += 'number of paramters {}'.format(self.net_size)
+        return output
+
+
+"""visual transformer model"""
+class Fcn(nn.Module):
+    def __init__(self, kernel_size=3, stride=1, padding=1):
+        super(Fcn, self).__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride
+
+        feature_size = 4
+
+        input_size = 2
+
+        self.conv1 = Conv(input_size, feature_size)
+        self.conv2 = Conv(feature_size, feature_size*2)
+        self.conv3 = Conv(feature_size*2, feature_size*4)
+        self.conv4 = Conv(feature_size*4, feature_size*8)
+        self.conv5 = Conv(feature_size*8, feature_size*16)
+
+        self.convF1 = nn.Linear(in_features=feature_size*16*7*13, out_features=64)
+        self.convF2 = nn.Linear(in_features=64, out_features=64)
+        self.convF3 = nn.Linear(in_features=64, out_features=6)
+
+        self.optim = torch.optim.Adam(self.parameters(), lr=0.001)
+        self.criteria = nn.CrossEntropyLoss()
+
+        self.device = torch.device('cuda:0' if torch.cuda.device_count() >= 1 else 'cpu')
+
+
+    def forward(self, x):
+        xD1 = self.conv1(x)
+
+        xD2 = nn.MaxPool2d(2)(xD1)
+        xD2 = self.conv2(xD2)
+
+        xD3 = nn.MaxPool2d(2)(xD2)
+        xD3 = self.conv3(xD3)
+
+        xD4 = nn.MaxPool2d(2)(xD3)
+        xD4 = self.conv4(xD4)
+
+        xD5 = nn.MaxPool2d(2)(xD4)
+        xD5 = self.conv5(xD5)
+
+        xU0 = nn.Flatten()(xD5)
+        xU0 = self.convF1(xU0)
+        xU0 = nn.Dropout(0.3)(xU0)
+        xU0 = nn.ReLU(inplace=True)(xU0)
+        xU0 = self.convF2(xU0)
+        xU0 = nn.Dropout(0.3)(xU0)
+        xU0 = nn.ReLU(inplace=True)(xU0)
+        xU0 = self.convF3(xU0)
+        xU0 = nn.Dropout(0.3)(xU0)
         xU0 = nn.ReLU(inplace=True)(xU0)
 
         o = F.log_softmax(xU0, dim=1)
