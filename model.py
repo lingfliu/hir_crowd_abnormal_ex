@@ -53,6 +53,8 @@ class Unet(nn.Module):
 
         self.device = torch.device('cuda:0' if torch.cuda.device_count() >= 1 else 'cpu')
 
+        self.net_size = sum(p.numel() for p in self.parameters() if p.requires_grad)
+
 
     def forward(self, x):
         xD1 = self.convD1(x)
@@ -133,6 +135,8 @@ class Fcn(nn.Module):
         self.criteria = nn.CrossEntropyLoss()
 
         self.device = torch.device('cuda:0' if torch.cuda.device_count() >= 1 else 'cpu')
+
+        self.net_size = sum(p.numel() for p in self.parameters() if p.requires_grad)
 
 
     def forward(self, x):
