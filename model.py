@@ -13,7 +13,7 @@ class Conv(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_size),
-            nn.Dropout2d(0.4),
+            # nn.Dropout2d(0.4),
             nn.ReLU(inplace=True)
         )
 
@@ -142,16 +142,16 @@ class Fcn(nn.Module):
     def forward(self, x):
         xD1 = self.conv1(x)
 
-        xD2 = nn.MaxPool2d(2)(xD1)
+        xD2 = nn.AvgPool2d(2)(xD1)
         xD2 = self.conv2(xD2)
 
-        xD3 = nn.MaxPool2d(2)(xD2)
+        xD3 = nn.AvgPool2d(2)(xD2)
         xD3 = self.conv3(xD3)
 
-        xD4 = nn.MaxPool2d(2)(xD3)
+        xD4 = nn.AvgPool2d(2)(xD3)
         xD4 = self.conv4(xD4)
 
-        xD5 = nn.MaxPool2d(2)(xD4)
+        xD5 = nn.AvgPool2d(2)(xD4)
         xD5 = self.conv5(xD5)
 
         xU0 = nn.Flatten()(xD5)
