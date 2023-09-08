@@ -11,10 +11,11 @@ class Conv(nn.Module):
             nn.Conv2d(in_channels, feature_size, kernel_size=3, padding=1),
             nn.BatchNorm2d(feature_size),
             nn.ReLU(inplace=True),
-            nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1),
-            nn.BatchNorm2d(feature_size),
-            # nn.Dropout2d(0.4),
-            nn.ReLU(inplace=True)
+            # nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1),
+            # nn.BatchNorm2d(feature_size),
+            # # nn.Dropout2d(0.4),
+            # nn.ReLU(inplace=True)
+
         )
 
     def forward(self, x):
@@ -127,9 +128,20 @@ class Fcn(nn.Module):
         self.conv4 = Conv(feature_size*4, feature_size*8)
         self.conv5 = Conv(feature_size*8, feature_size*16)
 
-        self.convF1 = nn.Linear(in_features=feature_size*16*7*13, out_features=64)
-        self.convF2 = nn.Linear(in_features=64, out_features=64)
-        self.convF3 = nn.Linear(in_features=64, out_features=6)
+        self.convF1 = nn.Sequential(
+            nn.Conv2d(feature_size*16, feature_size*32, kernel_size=(7,13), padding=0),
+            nn.BatchNorm2d(feature_size * 32),
+            nn.ReLU(inplace=True))
+
+        self.confF2 = nn.Sequential(
+            nn.Conv2d(feature_size*32, 6, kernel_size=(1,1), padding=0),
+            nn.BatchNorm2d(6),
+            nn.ReLU(inplace=True),
+        )
+
+        # self.convF1 = nn.Linear(in_features=feature_size*16*7*13, out_features=64)
+        # self.convF2 = nn.Linear(in_features=64, out_features=64)
+        # self.convF3 = nn.Linear(in_features=64, out_features=6)
 
         self.optim = torch.optim.Adam(self.parameters(), lr=0.001)
         self.criteria = nn.CrossEntropyLoss()
@@ -154,16 +166,19 @@ class Fcn(nn.Module):
         xD5 = nn.AvgPool2d(2)(xD4)
         xD5 = self.conv5(xD5)
 
-        xU0 = nn.Flatten()(xD5)
-        xU0 = self.convF1(xU0)
-        xU0 = nn.Dropout(0.3)(xU0)
-        xU0 = nn.ReLU(inplace=True)(xU0)
-        xU0 = self.convF2(xU0)
-        xU0 = nn.Dropout(0.3)(xU0)
-        xU0 = nn.ReLU(inplace=True)(xU0)
-        xU0 = self.convF3(xU0)
-        xU0 = nn.Dropout(0.3)(xU0)
-        xU0 = nn.ReLU(inplace=True)(xU0)
+        xU0 = self.convF1(xD5)
+        xU0 = self.confF2(xU0)
+        xU0 = nn.Flatten()(xU0)
+
+        # xU0 = self.convF1(xU0)
+        # xU0 = nn.Dropout(0.3)(xU0)
+        # xU0 = nn.ReLU(inplace=True)(xU0)
+        # xU0 = self.convF2(xU0)
+        # xU0 = nn.Dropout(0.3)(xU0)
+        # xU0 = nn.ReLU(inplace=True)(xU0)
+        # xU0 = self.convF3(xU0)
+        # xU0 = nn.Dropout(0.3)(xU0)
+        # xU0 = nn.ReLU(inplace=True)(xU0)
 
         o = F.log_softmax(xU0, dim=1)
         return o
