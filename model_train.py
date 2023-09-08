@@ -28,18 +28,24 @@ batch_size = 300
 train_vid_idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 test_vid_idx = [25, 26, 27, 28, 29, 30]
 
-idx = 0
-while label_collapsed[idx, 0] <= train_vid_idx[-1]:
-    idx += 1
+# idx = 0
+# while label_collapsed[idx, 0] <= train_vid_idx[-1]:
+#     idx += 1
+#
+#
+# train_idx = [i for i in range(idx)]
+# test_idx = [i+idx for i in range(label_collapsed.shape[0]-idx)]
 
-train_idx = [i for i in range(idx)]
-test_idx = [i+idx for i in range(label_collapsed.shape[0]-idx)]
+idx = [i for i in range(label_collapsed.shape[0])]
+random.shuffle(idx)
+train_idx = idx[:len(idx)*4//5]
+test_idx = idx[len(idx)*4//5:]
 
 
 batches = len(train_idx)//batch_size
 
-ep_idx = [i for i in range(len(train_idx))]
-random.shuffle(ep_idx)
+ep_idx = train_idx # [i for i in range(len(train_idx))]
+# random.shuffle(ep_idx)
 
 for ep in range(epoch_size):
 
@@ -54,11 +60,12 @@ for ep in range(epoch_size):
         batch_y = y[ep_idx[b*batch_size:b*batch_size+batch_size]]
 
         o = net(batch_x)
+        loss = net.loss(o, batch_y)
+
+        train_loss = loss.item()
         pred = torch.argmax(o, 1)
         truth = torch.argmax(batch_y, 1)
         acc = pred.eq(truth).sum().item() / (truth.shape[0] + 0.001)
-        loss = net.loss(o, batch_y)
-        train_loss = loss.item()
 
         # bp
         net.optim.zero_grad()
