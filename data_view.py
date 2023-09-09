@@ -15,6 +15,7 @@ for vid_file in vid_files:
     vid_idx = int(os.path.splitext(os.path.basename(vid_file))[0])
     lidx_start = -1
     lidx_stop = -1
+
     for idx, label in enumerate(labels_all):
         if label[0] == vid_idx:
             if lidx_start < 0:
