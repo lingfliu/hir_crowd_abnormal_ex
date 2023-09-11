@@ -6,8 +6,9 @@ from model import *
 import numpy as np
 
 from model import *
+from PIL import Image, ImageDraw, ImageFont
 
-lab_str = ["nothing", "Panic", "Fight", "Congestion", "Obstacle or abnormal object", "Neutral"]
+lab_str = ["无人", "逃散", "冲突", "聚集", "异物", "正常"]
 
 video_resize = 0.25
 
@@ -80,10 +81,17 @@ for video_file in vid_files:
         pre = torch.argmax(pre, 1).cpu().numpy()[0]
         # print(pre)
 
-        cv2.putText(img, 'pre:'+lab_str[pre], [0, 25], font, font_scale, (255, 0, 255), 2)  # 预测数据
-        cv2.putText(img, 'gt:'+lab_str[label[frame][2]], [0, 50], font, font_scale, (66, 245, 90), 2)  # gt标签
+        imgPil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(imgPil)
+        font = ImageFont.truetype("simhei.ttf", 20, encoding="utf-8")
+        draw.text((15, 5), '识别结果：'+lab_str[pre], (255, 0, 255), font=font)  # 预测数据
+        draw.text((15, 30), '参考：'+lab_str[label[frame][2]], (66, 245, 90), font=font)  # gt标签
+        imgTexted = cv2.cvtColor(np.asarray(imgPil), cv2.COLOR_RGB2BGR)
 
-        cv2.imshow(video_name, img)
+        # cv2.putText(img, 'pre:'+lab_str[pre], [0, 25], font, font_scale, (255, 0, 255), 2)  # 预测数据
+        # cv2.putText(img, 'gt:'+lab_str[label[frame][2]], [0, 50], font, font_scale, (66, 245, 90), 2)  # gt标签
+
+        cv2.imshow(video_name, imgTexted)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
