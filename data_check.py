@@ -9,6 +9,14 @@ vid_files = glob.glob(os.path.join(vid_root, '*.mp4'))
 
 labels = label_load()
 
+label_count = {}
+for l in labels:
+    if l[2] not in label_count.keys():
+        label_count[l[2]] = 1
+    else:
+        label_count[l[2]] += 1
+
+
 for vid_file in vid_files:
     video_name = os.path.splitext(os.path.basename(vid_file))[0]
     cap = cv2.VideoCapture(vid_file)
