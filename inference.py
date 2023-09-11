@@ -61,12 +61,14 @@ for video_file in vid_files:
     while True:
 
         ret, img = cap.read()  # 取出视频， img是原始视频
+
+        if not ret:
+            print("读取视频结束")
+            break
+
         img_model = cv2.resize(img, (0, 0), fx=video_resize, fy=video_resize)  # 输入视频
         img_grey = cv2.cvtColor(img_model, cv2.COLOR_BGR2GRAY)
 
-        if not ret:
-            print("无法读取视频帧")
-            break
 
         flow = cv2.calcOpticalFlowFarneback(prev_img_grey, img_grey, None, 0.5, 5, 15, 3, 5, 1.1,
                                             cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
