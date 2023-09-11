@@ -46,6 +46,7 @@ def infer_task(a):
                 fid = Config['file_demo']
 
             # 如文件不存在，返回失败
+            # TODO：comment out if for offline test
             if not fileApi.isFileExist(fid):
                 taskApi.update_task(task_id,
                                     task_type,
@@ -59,10 +60,10 @@ def infer_task(a):
                 a.target = ()
                 a.pending = False
                 continue
+            fileApi.download(file_name=fid, saved_file_path=tmp_file_name)
+            # #
 
             tmp_file_name = 'vid.mp4'
-
-            # fileApi.download(file_name=fid, saved_file_path=tmp_file_name)
 
             labels = infer(tmp_file_name)
 
@@ -73,7 +74,7 @@ def infer_task(a):
             # generate result file
             output_file_name = 'output_{}'.format(task_id) + '.dat'
             with open(output_file_name, 'w') as f:
-                np.savetxt(f, np.array(labels))
+                np.savetxt(f, np.array(labels).astype(int), format('%d'))
                 f.close()
 
             while not os.path.exists(output_file_name):
@@ -129,7 +130,8 @@ class Alg:
 
 alg = Alg()
 
-alg_type = 'crowd_anomaly'
+alg_type = 'crowd_anomaly_dl' # crowd anomaly detection based on deep learning
+
 """
 算法信息
 """

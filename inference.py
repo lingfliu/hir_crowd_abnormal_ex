@@ -54,10 +54,8 @@ for video_file in vid_files:
     ret, img = cap.read()  # 取出
     img_model = cv2.resize(img, (0, 0), fx=video_resize, fy=video_resize)  # 输入模型的第一帧图片，缩放
     img_grey = cv2.cvtColor(img_model, cv2.COLOR_BGR2GRAY)  # 二值
-
-    # flow = np.zeros((img.shape[0], img.shape[1], 2))
-    # flows = np.empty((0, img.shape[0], img.shape[1], 2))
     prev_img_grey = img_grey  # 第一帧视频
+
     frame = 1  # 第二帧视频
     while True:
 
@@ -67,9 +65,8 @@ for video_file in vid_files:
             print("读取视频结束")
             break
 
-        img_model = cv2.resize(img, (0, 0), fx=video_resize, fy=video_resize)  # 输入视频
+        img_model = cv2.resize(img, (0, 0), fx=video_resize, fy=video_resize)  # scale image to 0.25*0.25
         img_grey = cv2.cvtColor(img_model, cv2.COLOR_BGR2GRAY)
-
 
         flow = cv2.calcOpticalFlowFarneback(prev_img_grey, img_grey, None, 0.5, 5, 15, 3, 5, 1.1,
                                             cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
@@ -79,17 +76,14 @@ for video_file in vid_files:
 
         pre = model(flow)  # 预测输出
         pre = torch.argmax(pre, 1).cpu().numpy()[0]
-        # print(pre)
 
+        # visualization
         imgPil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         draw = ImageDraw.Draw(imgPil)
         font = ImageFont.truetype("simhei.ttf", 20, encoding="utf-8")
         draw.text((15, 5), '识别结果：'+lab_str[pre], (255, 0, 255), font=font)  # 预测数据
         draw.text((15, 30), '参考：'+lab_str[label[frame][2]], (66, 245, 90), font=font)  # gt标签
         imgTexted = cv2.cvtColor(np.asarray(imgPil), cv2.COLOR_RGB2BGR)
-
-        # cv2.putText(img, 'pre:'+lab_str[pre], [0, 25], font, font_scale, (255, 0, 255), 2)  # 预测数据
-        # cv2.putText(img, 'gt:'+lab_str[label[frame][2]], [0, 50], font, font_scale, (66, 245, 90), 2)  # gt标签
 
         cv2.imshow(video_name, imgTexted)
 
