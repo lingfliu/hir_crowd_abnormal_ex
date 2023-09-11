@@ -138,11 +138,11 @@ alg_type = 'crowd_anomaly_dl' # crowd anomaly detection based on deep learning
 @app.route('/api/about', methods=['GET'])
 def about():
     return {
-        'name': 'hir_alg_crowd_count',
+        'name': 'HIR人群异常检测-DL模型',
         'type': alg_type,
         'version': '1.0',
         'description': 'a crowd count algorithm based on vgg19 and bayesian loss',
-        'mode': infer.device.type # 算法运行模式：cpu / cuda
+        'mode': 'cpu' # 算法运行模式：cpu
     }
 
 
@@ -226,7 +226,7 @@ def infer_result_demo():
         'status': TASK_STATUS_DONE,
         'result_file_name': 'result_file_name',
         'result_params': {
-            'count': 700,
+            'abnormal': 1,
         }
     }
 
