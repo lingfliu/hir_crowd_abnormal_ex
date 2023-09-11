@@ -10,7 +10,7 @@ from torchvision import transforms
 import numpy as np
 import random
 
-from dataloader import MED
+# from dataloader import MED
 from model import Unet
 from utils import read_split_data, train_one_epoch, evaluate
 

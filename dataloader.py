@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import scipy.io as sio
-import skvideo
+# import skvideo
 import cv2
 import time
 from multiprocessing import Pool

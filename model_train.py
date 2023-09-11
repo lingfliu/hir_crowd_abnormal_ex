@@ -11,7 +11,7 @@ net = Fcn()
 net = net.to(net.device)
 net.summarize()
 
-label_collapsed = label_load_trunc() # 减掉第一帧的标签
+label_collapsed = label_load_trunc()  # 减掉第一帧的标签
 labels = []
 for label in label_collapsed:
     labels.append(label[2])
